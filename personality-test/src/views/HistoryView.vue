@@ -1,55 +1,173 @@
 <template>
-  <div class="page-container">
-    <div class="content-box" style="max-width: 640px;">
-      <h1 class="page-title">历史记录</h1>
-      <div v-if="historyStore.hasRecords" class="history-list">
-        <div v-for="record in historyStore.sortedRecords" :key="record.id" class="history-item" :style="{ borderLeftColor: record.colors?.primary || 'var(--color-primary)' }">
-          <div class="item-header">
-            <span class="item-type" :style="{ color: record.colors?.primary }">{{ record.typeName }}</span>
-            <span class="item-theme">{{ record.themeName }}</span>
-            <span class="item-time">{{ formatTime(record.timestamp) }}</span>
-          </div>
-          <p class="item-desc">{{ record.typeDescription }}</p>
-          <div class="item-actions">
-            <button class="btn-sm" @click="viewDetail(record)">查看详情</button>
-            <button class="btn-sm btn-danger" @click="historyStore.removeRecord(record.id)">删除</button>
+  <section class="page-shell history-shell">
+    <div class="history-head">
+      <div>
+        <p class="eyebrow">历史记录</p>
+        <h1>你完成过的测试结果</h1>
+      </div>
+      <button
+        v-if="historyStore.hasRecords"
+        class="btn-secondary"
+        type="button"
+        @click="historyStore.clearAll"
+      >
+        清空全部
+      </button>
+    </div>
+
+    <EmptyState
+      v-if="!storageAvailable"
+      message="当前设备暂时无法保留测试记录。"
+      action-text="返回首页"
+      @action="router.push('/')"
+    />
+
+    <EmptyState
+      v-else-if="!historyStore.hasRecords"
+      message="还没有历史记录，先去完成一套测试。"
+      action-text="去测试"
+      @action="router.push('/')"
+    />
+
+    <div v-else class="history-list">
+      <article v-for="record in historyStore.sortedRecords" :key="record.id" class="history-item">
+        <div class="history-main">
+          <span class="color-mark" :style="{ background: record.colors.primary }"></span>
+          <div>
+            <p class="history-meta">{{ record.themeName }} · {{ formatTime(record.timestamp) }}</p>
+            <h2>{{ record.typeName }}</h2>
+            <p class="history-text">{{ record.typeDescription }}</p>
           </div>
         </div>
-        <button class="btn-secondary clear-btn" @click="historyStore.clearAll()">清空所有记录</button>
-      </div>
-      <EmptyState v-else message="暂无测试记录" action-text="去测试" @action="$router.push('/')" />
+        <div class="history-actions">
+          <button class="btn-secondary" type="button" @click="viewRecord(record.id)">查看</button>
+          <button class="btn-secondary" type="button" @click="historyStore.removeRecord(record.id)">删除</button>
+        </div>
+      </article>
     </div>
-  </div>
+  </section>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useHistoryStore } from '@/stores/history'
 import EmptyState from '@/components/EmptyState.vue'
+import { useHistoryStore } from '@/stores/history'
+import { useQuizStore } from '@/stores/quiz'
+import { storageService } from '@/services/storageService'
 
 const router = useRouter()
 const historyStore = useHistoryStore()
+const quizStore = useQuizStore()
+const storageAvailable = computed(() => storageService.isAvailable())
 
-function formatTime(ts: number): string {
-  return new Date(ts).toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+function formatTime(value: string): string {
+  return new Date(value).toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
-function viewDetail(_record: any) {
-  // 简化实现：直接在当前页展示
+function viewRecord(id: string): void {
+  const record = historyStore.getRecordById(id)
+  if (!record) return
+
+  quizStore.hydrateResult({
+    themeId: record.themeId,
+    themeName: record.themeName,
+    typeId: record.typeId,
+    typeName: record.typeName,
+    typeDescription: record.typeDescription,
+    colors: record.colors,
+    dimensionScores: record.dimensionScores,
+  })
+  router.push('/result')
 }
 </script>
 
 <style scoped lang="scss">
-.page-title { font-size: 24px; font-weight: 700; text-align: center; margin-bottom: 16px; }
-.history-list { display: flex; flex-direction: column; gap: 12px; }
-.history-item { padding: 16px; border: 1px solid var(--color-border); border-left: 3px solid; border-radius: 12px; background: var(--color-surface); }
-.item-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-.item-type { font-weight: 600; font-size: 16px; }
-.item-theme { font-size: 12px; color: var(--color-text-secondary); background: var(--color-bg); padding: 2px 8px; border-radius: 4px; }
-.item-time { font-size: 12px; color: var(--color-text-secondary); margin-left: auto; }
-.item-desc { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 8px; line-height: 1.5; }
-.item-actions { display: flex; gap: 8px; }
-.btn-sm { padding: 4px 12px; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-surface); font-size: 12px; cursor: pointer; color: var(--color-text-secondary); &:hover { color: var(--color-text); } &.btn-danger { color: #E74C3C; } }
-.clear-btn { margin-top: 12px; }
-.btn-secondary { display: flex; align-items: center; justify-content: center; width: 100%; height: 40px; border: 2px solid var(--color-border); border-radius: 10px; background: var(--color-surface); color: var(--color-text-secondary); font-size: 14px; cursor: pointer; &:hover { border-color: var(--color-text-secondary); } }
+.history-shell {
+  display: grid;
+  gap: 22px;
+}
+
+.history-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: end;
+}
+
+.eyebrow {
+  color: var(--color-primary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.history-list {
+  display: grid;
+  gap: 14px;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.history-main {
+  display: flex;
+  gap: 14px;
+  align-items: start;
+}
+
+.color-mark {
+  width: 10px;
+  min-height: 92px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.history-meta,
+.history-text {
+  color: var(--color-text-secondary);
+}
+
+.history-meta {
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.history-text {
+  margin-top: 8px;
+  line-height: 1.7;
+  max-width: 70ch;
+}
+
+.history-actions {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+@media (max-width: 820px) {
+  .history-item,
+  .history-head {
+    flex-direction: column;
+  }
+
+  .history-actions {
+    width: 100%;
+  }
+}
 </style>

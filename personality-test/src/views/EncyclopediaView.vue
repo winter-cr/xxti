@@ -1,51 +1,135 @@
 <template>
-  <div class="page-container">
-    <div class="content-box" style="max-width: 720px;">
-      <h1 class="page-title">类型百科</h1>
-      <div class="tabs">
-        <button v-for="t in themes" :key="t.id" class="tab-btn" :class="{ active: currentTheme === t.id }" @click="currentTheme = t.id">{{ t.icon }} {{ t.name }}</button>
+  <section class="page-shell encyclopedia-shell">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">类型百科</p>
+        <h1>按主题浏览全部人格类型。</h1>
       </div>
-      <SearchInput v-model="keyword" placeholder="搜索类型名称或特质..." />
-      <div class="type-grid">
-        <TypeCard v-for="item in filteredList" :key="item.typeId" :type="item" @click="selectedType = item" />
-      </div>
-      <EmptyState v-if="filteredList.length === 0" message="未找到匹配的类型" action-text="清除搜索" @action="keyword = ''" />
+      <SearchInput v-model="keyword" placeholder="搜索名称、别名或核心特质" />
     </div>
-    <TypeDetail v-if="selectedType" :type="selectedType" :visible="!!selectedType" @close="selectedType = null" />
-  </div>
+
+    <div class="theme-tabs" role="tablist" aria-label="百科主题">
+      <button
+        v-for="theme in themes"
+        :key="theme.id"
+        type="button"
+        class="theme-tab"
+        :class="{ active: currentThemeId === theme.id }"
+        @click="currentThemeId = theme.id"
+      >
+        {{ theme.name }}
+      </button>
+    </div>
+
+    <EmptyState
+      v-if="filteredTypes.length === 0"
+      message="未找到匹配的人格类型"
+    />
+
+    <div v-else class="type-grid">
+      <TypeCard
+        v-for="type in filteredTypes"
+        :key="type.typeId"
+        :type="type"
+        :colors="type.colors"
+        @select="selectedType = type"
+      />
+    </div>
+
+    <TypeDetail
+      :visible="selectedType !== null"
+      :type="selectedType"
+      @close="selectedType = null"
+    />
+  </section>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import type { ThemeId, TypeEncyclopedia } from '@/types'
-import { getAllThemes, getThemeConfig } from '@/data/themes'
+import { computed, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import EmptyState from '@/components/EmptyState.vue'
 import SearchInput from '@/components/SearchInput.vue'
 import TypeCard from '@/components/TypeCard.vue'
 import TypeDetail from '@/components/TypeDetail.vue'
-import EmptyState from '@/components/EmptyState.vue'
+import { getAllThemes, getThemeConfig, isThemeId } from '@/data/themes'
+import type { ThemeId, TypeEncyclopedia } from '@/types'
 
+const route = useRoute()
 const themes = getAllThemes()
-const currentTheme = ref<ThemeId>('mbti')
+const routeTheme = String(route.query.theme ?? '')
+const currentThemeId = ref<ThemeId>(isThemeId(routeTheme) ? routeTheme : 'mbti')
 const keyword = ref('')
 const selectedType = ref<TypeEncyclopedia | null>(null)
 
-const filteredList = computed(() => {
-  const config = getThemeConfig(currentTheme.value)
-  const list = config.encyclopedia
-  if (!keyword.value) return list
-  const kw = keyword.value.toLowerCase()
-  return list.filter((t) => t.typeName.toLowerCase().includes(kw) || t.coreTraits.some((tr) => tr.toLowerCase().includes(kw)) || t.alias.toLowerCase().includes(kw))
+const filteredTypes = computed(() => {
+  const lower = keyword.value.trim().toLowerCase()
+  const source = getThemeConfig(currentThemeId.value).encyclopedia
+  if (!lower) return source
+
+  return source.filter((item) =>
+    item.typeName.toLowerCase().includes(lower) ||
+    item.alias.toLowerCase().includes(lower) ||
+    item.coreTraits.some((trait) => trait.toLowerCase().includes(lower)),
+  )
 })
 </script>
 
 <style scoped lang="scss">
-.page-title { font-size: 24px; font-weight: 700; text-align: center; margin-bottom: 16px; }
-.tabs { display: flex; gap: 8px; margin-bottom: 16px; justify-content: center; flex-wrap: wrap; }
-.tab-btn {
-  padding: 8px 16px; border: 2px solid var(--color-border); border-radius: 10px;
-  background: var(--color-surface); color: var(--color-text-secondary);
-  font-size: 14px; cursor: pointer; transition: all 0.2s;
-  &.active { border-color: var(--color-primary); color: var(--color-primary); background: rgba(74,108,247,0.06); }
+.encyclopedia-shell {
+  display: grid;
+  gap: 24px;
 }
-.type-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-top: 16px; }
+
+.section-head {
+  display: grid;
+  grid-template-columns: 1fr minmax(280px, 360px);
+  gap: 18px;
+  align-items: end;
+}
+
+.eyebrow {
+  color: var(--color-primary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.section-head h1 {
+  font-size: clamp(1.8rem, 2.8vw, 3rem);
+}
+
+.theme-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.theme-tab {
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+
+  &.active {
+    border-color: var(--color-primary);
+    color: var(--color-text);
+    background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
+  }
+}
+
+.type-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 980px) {
+  .section-head,
+  .type-grid {
+    grid-template-columns: 1fr;
+  }
+}
 </style>

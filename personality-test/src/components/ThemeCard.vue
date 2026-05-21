@@ -1,82 +1,90 @@
 <template>
-  <div class="theme-card" @click="$emit('select', theme.id)">
-    <div class="theme-icon">{{ theme.icon }}</div>
-    <div class="theme-info">
-      <h3 class="theme-name">{{ theme.name }}</h3>
-      <p class="theme-desc">{{ theme.description }}</p>
-      <div class="theme-meta">
-        <span>📝 {{ theme.questionCount }} 题</span>
-        <span>⏱️ 约{{ theme.estimatedTime }}分钟</span>
+  <article class="theme-card">
+    <div class="card-top">
+      <span class="theme-icon">{{ theme.icon }}</span>
+      <div>
+        <h3>{{ theme.name }}</h3>
+        <p>{{ theme.description }}</p>
       </div>
     </div>
-    <div class="theme-arrow">→</div>
-  </div>
+    <div class="theme-meta">
+      <span>{{ theme.questionCount }} 题</span>
+      <span>约 {{ theme.estimatedTime }} 分钟</span>
+    </div>
+    <button class="btn-primary card-action" type="button" @click="$emit('select', theme.id)">
+      开始测试
+    </button>
+  </article>
 </template>
 
 <script setup lang="ts">
-import type { ThemeMeta } from '@/types'
+import type { ThemeId, ThemeMeta } from '@/types'
 
 defineProps<{
   theme: ThemeMeta
 }>()
 
 defineEmits<{
-  select: [themeId: string]
+  select: [themeId: ThemeId]
 }>()
 </script>
 
 <style scoped lang="scss">
 .theme-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 20px;
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+  border-radius: 18px;
   background: var(--color-surface);
-  border: 2px solid var(--color-border);
-  border-radius: 16px;
-  cursor: pointer;
-  transition: all 0.2s;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-soft);
+}
 
-  &:hover {
-    border-color: var(--color-primary);
-    box-shadow: 0 4px 12px rgba(74, 108, 247, 0.12);
-    transform: translateY(-2px);
+.card-top {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+
+  h3 {
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+  }
+
+  p {
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    font-size: 0.95rem;
   }
 }
 
 .theme-icon {
-  font-size: 36px;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-muted);
+  color: var(--color-primary);
+  font-weight: 700;
   flex-shrink: 0;
-}
-
-.theme-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.theme-name {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.theme-desc {
-  font-size: 13px;
-  color: var(--color-text-secondary);
-  margin-bottom: 8px;
-  line-height: 1.5;
 }
 
 .theme-meta {
   display: flex;
-  gap: 16px;
-  font-size: 12px;
-  color: var(--color-text-secondary);
+  gap: 10px;
+  flex-wrap: wrap;
+
+  span {
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: var(--color-surface-muted);
+    color: var(--color-text-secondary);
+    font-size: 0.84rem;
+  }
 }
 
-.theme-arrow {
-  font-size: 20px;
-  color: var(--color-primary);
-  flex-shrink: 0;
+.card-action {
+  width: 100%;
 }
 </style>

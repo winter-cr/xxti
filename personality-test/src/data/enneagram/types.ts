@@ -1,42 +1,51 @@
-import type { PersonalityType, TypeEncyclopedia, MatchRule } from '@/types'
+import type { PersonalityType, TypeEncyclopedia } from '@/types'
 
-const c = (p: string, s: string, b: string) => ({ primary: p, secondary: s, background: b })
+interface EnneagramSeed {
+  id: string
+  name: string
+  alias: string
+  description: string
+  traits: string[]
+  colors: {
+    primary: string
+    secondary: string
+    background: string
+  }
+  strengths: string[]
+  weaknesses: string[]
+  careers: string[]
+  bestMatch: string
+}
 
-export const types: PersonalityType[] = [
-  { id: 'HTLP', name: '助人成就者', description: '以助人为核心驱动的掌控者，理性思考中追求忠诚关系。你是坚定守护他人利益的行动派。', colors: c('#E74C3C', '#F5B7B1', '#FDEDEC'), traits: ['助人', '掌控', '理性', '忠诚'] },
-  { id: 'HTLE', name: '关怀探索者', description: '助人导向的理性探索者，在自由中寻找人生意义。你是用智慧温暖他人的旅者。', colors: c('#F39C12', '#FAD7A0', '#FEF5E7'), traits: ['助人', '探索', '理性', '自由'] },
-  { id: 'HTWP', name: '和谐守护者', description: '助人型和平主义者，感受力强且重视忠诚。你是温柔体贴、默默守护身边人的天使。', colors: c('#1ABC9C', '#A3E4D7', '#E8F8F5'), traits: ['助人', '和平', '感受', '忠诚'] },
-  { id: 'HTWE', name: '感性旅者', description: '助人型的感性探索者，在和平中追寻自由体验。你是善解人意、热爱生命的灵魂旅者。', colors: c('#E91E63', '#F48FB1', '#FCE4EC'), traits: ['助人', '和平', '感受', '自由'] },
-  { id: 'ATLP', name: '理性统帅', description: '成就驱动的理性掌控者，重视忠诚与秩序。你是目标明确、意志坚定的天生领导者。', colors: c('#2C3E50', '#5D6D7E', '#EAECEE'), traits: ['成就', '掌控', '理性', '忠诚'] },
-  { id: 'ATLE', name: '远见开拓者', description: '成就驱动的理性探索者，不断开拓新领域。你是视野开阔、敢于突破的先驱者。', colors: c('#7D3C98', '#C39BD3', '#F4ECF7'), traits: ['成就', '探索', '理性', '开拓'] },
-  { id: 'ATWP', name: '稳健实干家', description: '成就驱动的感性掌控者，在和谐中追求目标。你是踏实可靠、温暖有力的执行者。', colors: c('#4CAF50', '#A5D6A7', '#E8F5E9'), traits: ['成就', '和平', '感受', '稳健'] },
-  { id: 'ATWE', name: '自由创造者', description: '成就驱动的感性探索者，在自由中创造价值。你是充满激情、追求精彩的冒险家。', colors: c('#FF9800', '#FFCC80', '#FFF3E0'), traits: ['成就', '和平', '感受', '自由'] },
-  { id: 'AFLP', name: '思考守护者', description: '以感受为导向的理性忠诚者，在掌控中守护。你是深沉内敛、逻辑清晰的守护者。', colors: c('#37474F', '#90A4AE', '#ECEFF1'), traits: ['感受', '掌控', '理性', '忠诚'] },
-  { id: 'AFLE', name: '灵感捕手', description: '感性思考者与自由探索者，在感受中寻找创新灵感。你是敏感细腻、创意无限的梦想家。', colors: c('#0097A7', '#80DEEA', '#E0F7FA'), traits: ['感受', '探索', '理性', '灵感'] },
-  { id: 'AFWP', name: '温柔守望者', description: '感性的和平主义者，忠于关系且重视和谐。你是安静温暖、包容一切的避风港。', colors: c('#5C6BC0', '#9FA8DA', '#E8EAF6'), traits: ['感受', '和平', '忠诚', '温柔'] },
-  { id: 'AFWE', name: '浪漫冒险者', description: '感性的自由灵魂，在和平中追寻浪漫体验。你是用情感丈量世界、热爱美好的诗人。', colors: c('#795548', '#BCAAA4', '#EFEBE9'), traits: ['感受', '和平', '自由', '浪漫'] },
-  { id: 'HFLP', name: '忠诚思考者', description: '助人型理性忠诚者，用逻辑守护所爱。你是冷静分析、默默付出的守卫者。', colors: c('#5D6D7E', '#AEB6BF', '#EAECEE'), traits: ['助人', '掌控', '理性', '忠诚'] },
-  { id: 'HFLE', name: '自由思想者', description: '助人型理性探索者，用创新方式关怀世界。你是思想开放、善良真诚的改革者。', colors: c('#26A69A', '#80CBC4', '#E0F2F1'), traits: ['助人', '探索', '理性', '自由'] },
-  { id: 'HFWP', name: '温暖依靠者', description: '助人型感性忠诚者，以和平方式守护关系。你是柔软可靠、让人安心的港湾。', colors: c('#4E342E', '#8D6E63', '#EFEBE9'), traits: ['助人', '和平', '感受', '忠诚'] },
-  { id: 'HFWE', name: '随性关怀者', description: '助人型感性探索者，在自由中传递温暖。你是轻松自在、用爱感染身边人的阳光者。', colors: c('#FF5722', '#FFAB91', '#FBE9E7'), traits: ['助人', '和平', '感受', '自由'] },
+const seeds: EnneagramSeed[] = [
+  { id: '1', name: '改革者', alias: 'Reformer', description: '重视原则、质量和秩序，希望事情更正确、更完善。', traits: ['原则', '改进', '克制', '标准'], colors: { primary: '#0f766e', secondary: '#99f6e4', background: '#f0fdfa' }, strengths: ['能守住标准', '责任感强', '愿意主动修正问题'], weaknesses: ['容易苛责自己和他人', '压力下紧绷', '不易放松'], careers: ['质量管理', '审计监督', '流程优化'], bestMatch: '7' },
+  { id: '2', name: '助人者', alias: 'Helper', description: '敏锐感知他人需要，愿意通过照顾与支持建立连接。', traits: ['关怀', '热心', '连接', '付出'], colors: { primary: '#db2777', secondary: '#f9a8d4', background: '#fdf2f8' }, strengths: ['照顾感强', '关系经营细腻', '愿意主动补位'], weaknesses: ['边界感偏弱', '容易压抑自己', '在意被需要'], careers: ['客户成功', '教育支持', '社群服务'], bestMatch: '8' },
+  { id: '3', name: '成就者', alias: 'Achiever', description: '擅长聚焦成果和效率，喜欢通过表现验证自身价值。', traits: ['成就', '效率', '目标', '适应'], colors: { primary: '#2563eb', secondary: '#93c5fd', background: '#eff6ff' }, strengths: ['目标推进能力强', '执行效率高', '擅长场景切换'], weaknesses: ['容易忽略真实感受', '过度结果导向', '停不下来'], careers: ['商业运营', '项目管理', '市场拓展'], bestMatch: '9' },
+  { id: '4', name: '艺术家', alias: 'Individualist', description: '看重真实和独特表达，情绪体验深，审美与意义感强。', traits: ['独特', '情绪', '表达', '审美'], colors: { primary: '#7c3aed', secondary: '#c4b5fd', background: '#faf5ff' }, strengths: ['表达能力细腻', '能捕捉情绪层次', '富于审美判断'], weaknesses: ['容易陷入情绪波动', '过度比较', '不喜欢被粗暴定义'], careers: ['品牌创意', '视觉内容', '艺术策划'], bestMatch: '1' },
+  { id: '5', name: '观察者', alias: 'Investigator', description: '依赖理解和独立判断来建立安全感，重视知识边界和思考空间。', traits: ['分析', '独立', '知识', '节制'], colors: { primary: '#4338ca', secondary: '#a5b4fc', background: '#eef2ff' }, strengths: ['学习快', '分析深', '面对复杂系统耐心足'], weaknesses: ['容易抽离关系', '精力保守', '行动启动慢'], careers: ['研究分析', '数据策略', '系统设计'], bestMatch: '2' },
+  { id: '6', name: '忠诚者', alias: 'Loyalist', description: '擅长预判风险与不确定性，希望通过准备和验证建立可靠感。', traits: ['谨慎', '可靠', '预判', '责任'], colors: { primary: '#475569', secondary: '#cbd5e1', background: '#f8fafc' }, strengths: ['风险意识强', '能守住底线', '团队协作稳'], weaknesses: ['容易焦虑', '反复验证消耗大', '决策迟疑'], careers: ['风控合规', '项目保障', '安全运营'], bestMatch: '3' },
+  { id: '7', name: '享乐者', alias: 'Enthusiast', description: '热爱体验与自由，善于打开局面，让环境充满可能性。', traits: ['乐观', '体验', '跳脱', '轻盈'], colors: { primary: '#ea580c', secondary: '#fdba74', background: '#fff7ed' }, strengths: ['创意充足', '带动氛围快', '面对变化很有弹性'], weaknesses: ['容易分散', '回避沉重问题', '不爱被束缚'], careers: ['内容策划', '活动创意', '创新业务'], bestMatch: '1' },
+  { id: '8', name: '保护者', alias: 'Challenger', description: '重视力量、边界与掌控感，倾向直接处理问题并保护自己人。', traits: ['力量', '边界', '直接', '担当'], colors: { primary: '#b91c1c', secondary: '#fca5a5', background: '#fef2f2' }, strengths: ['敢拍板', '抗压强', '能扛事也能护人'], weaknesses: ['表达过硬', '不易示弱', '冲突感较强'], careers: ['团队管理', '商务谈判', '应急决策'], bestMatch: '2' },
+  { id: '9', name: '调停者', alias: 'Peacemaker', description: '追求和谐与稳定，擅长让不同意见重新回到可协商状态。', traits: ['平和', '包容', '整合', '稳定'], colors: { primary: '#059669', secondary: '#6ee7b7', background: '#ecfdf5' }, strengths: ['协调感好', '让团队降温', '能看见多方需要'], weaknesses: ['容易压住自己', '决断慢', '回避正面冲突'], careers: ['组织协调', '客户关系', '内部支持'], bestMatch: '3' },
 ]
 
-export const encyclopedia: TypeEncyclopedia[] = types.map(t => ({
-  typeId: t.id,
-  typeName: t.name,
-  alias: t.name,
-  coreTraits: t.traits || [],
-  strengths: t.traits?.slice(0, 2) || [],
-  weaknesses: ['需要关注内在平衡'],
-  careers: ['多种职业方向'],
-  bestMatch: types.find(o => o.id !== t.id)?.id || '',
-  colors: t.colors || c('#4A6CF7', '#6B8AFF', '#EEF0FF'),
-  description: t.description,
+export const personalityTypes: PersonalityType[] = seeds.map((seed) => ({
+  id: seed.id,
+  name: seed.name,
+  description: seed.description,
+  traits: seed.traits,
+  colors: seed.colors,
 }))
 
-export const matchRules: MatchRule[] = [
-  { dimensionId: 'HR', polePairs: { 'AA': 75, 'AB': 55, 'BA': 55, 'BB': 75 } },
-  { dimensionId: 'IT', polePairs: { 'AA': 70, 'AB': 85, 'BA': 85, 'BB': 70 } },
-  { dimensionId: 'SC', polePairs: { 'AA': 80, 'AB': 45, 'BA': 45, 'BB': 80 } },
-  { dimensionId: 'PW', polePairs: { 'AA': 60, 'AB': 75, 'BA': 75, 'BB': 60 } },
-]
+export const encyclopedia: TypeEncyclopedia[] = seeds.map((seed) => ({
+  typeId: seed.id,
+  typeName: seed.name,
+  alias: seed.alias,
+  coreTraits: seed.traits,
+  strengths: seed.strengths,
+  weaknesses: seed.weaknesses,
+  careers: seed.careers,
+  bestMatch: seed.bestMatch,
+  colors: seed.colors,
+  traits: seed.traits,
+}))

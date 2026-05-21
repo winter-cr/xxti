@@ -1,8 +1,13 @@
 export type PoleId = 'A' | 'B'
-
 export type ThemeId = 'mbti' | 'bigfive' | 'enneagram'
-
 export type ThemeMode = 'light' | 'dark'
+export type ResultMode = 'binary' | 'dominant'
+
+export interface TypeColors {
+  primary: string
+  secondary: string
+  background: string
+}
 
 export interface Dimension {
   id: string
@@ -27,18 +32,12 @@ export interface Question {
   optionB: QuestionOption
 }
 
-export interface TypeColors {
-  primary: string
-  secondary: string
-  background: string
-}
-
 export interface PersonalityType {
   id: string
   name: string
   description: string
-  colors?: TypeColors
-  traits?: string[]
+  traits: string[]
+  colors: TypeColors
 }
 
 export interface TypeEncyclopedia {
@@ -51,12 +50,22 @@ export interface TypeEncyclopedia {
   careers: string[]
   bestMatch: string
   colors: TypeColors
-  description: string
+  traits: string[]
 }
 
 export interface MatchRule {
   dimensionId: string
   polePairs: Record<string, number>
+}
+
+export interface DimensionScore {
+  dimensionId: string
+  dimensionName: string
+  poleAName: string
+  poleBName: string
+  poleAScore: number
+  poleBScore: number
+  resultPoleKey: string
 }
 
 export interface DimensionMatchAnalysis {
@@ -76,40 +85,32 @@ export interface MatchResult {
   dimensionAnalyses: DimensionMatchAnalysis[]
 }
 
-export interface DimensionScore {
-  dimensionId: string
-  dimensionName: string
-  poleAName: string
-  poleBName: string
-  poleAScore: number
-  poleBScore: number
-  resultPoleKey: string
-}
-
 export interface TestResult {
+  themeId: ThemeId
+  themeName: string
   typeId: string
   typeName: string
   typeDescription: string
+  colors: TypeColors
   dimensionScores: DimensionScore[]
-  colors?: TypeColors
 }
 
 export interface QuizProgress {
   currentQuestionIndex: number
   answers: Record<number, string>
-  themeId?: ThemeId
+  themeId: ThemeId
 }
 
 export interface HistoryRecord {
   id: string
-  timestamp: number
+  timestamp: string
   themeId: ThemeId
   themeName: string
   typeId: string
   typeName: string
   typeDescription: string
   dimensionScores: DimensionScore[]
-  colors?: TypeColors
+  colors: TypeColors
 }
 
 export interface ThemeMeta {
@@ -123,9 +124,10 @@ export interface ThemeMeta {
 
 export interface ThemeConfig {
   meta: ThemeMeta
+  resultMode: ResultMode
   dimensions: Dimension[]
   questions: Question[]
   types: PersonalityType[]
   encyclopedia: TypeEncyclopedia[]
-  matchRules: MatchRule[]
+  matchRules?: MatchRule[]
 }

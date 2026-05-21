@@ -1,15 +1,17 @@
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import type { HistoryRecord } from '@/types'
 import { storageService } from '@/services/storageService'
+import type { HistoryRecord, TestResult } from '@/types'
 
-const MAX_RECORDS = 20
+function persist(records: HistoryRecord[]): void {
+  storageService.saveHistory(records)
+}
 
 export const useHistoryStore = defineStore('history', () => {
   const records = ref<HistoryRecord[]>([])
 
   const sortedRecords = computed(() =>
-    [...records.value].sort((a, b) => b.timestamp - a.timestamp),
+    [...records.value].sort((a, b) => b.timestamp.localeCompare(a.timestamp)),
   )
 
   const hasRecords = computed(() => records.value.length > 0)
@@ -18,28 +20,46 @@ export const useHistoryStore = defineStore('history', () => {
     records.value = storageService.loadHistory()
   }
 
-  function addRecord(record: HistoryRecord): void {
-    records.value.push(record)
-    if (records.value.length > MAX_RECORDS) {
-      records.value.sort((a, b) => a.timestamp - b.timestamp)
-      records.value = records.value.slice(records.value.length - MAX_RECORDS)
+  function addRecord(result: TestResult): HistoryRecord {
+    const nextRecord: HistoryRecord = {
+      id: `${result.themeId}-${result.typeId}-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      themeId: result.themeId,
+      themeName: result.themeName,
+      typeId: result.typeId,
+      typeName: result.typeName,
+      typeDescription: result.typeDescription,
+      dimensionScores: result.dimensionScores,
+      colors: result.colors,
     }
-    storageService.saveHistory(records.value)
+
+    records.value = [nextRecord, ...records.value].slice(0, 20)
+    persist(records.value)
+    return nextRecord
   }
 
   function removeRecord(id: string): void {
-    records.value = records.value.filter((r) => r.id !== id)
-    storageService.saveHistory(records.value)
+    records.value = records.value.filter((record) => record.id !== id)
+    persist(records.value)
   }
 
   function clearAll(): void {
     records.value = []
-    storageService.saveHistory([])
+    storageService.clearHistory()
   }
 
   function getRecordById(id: string): HistoryRecord | undefined {
-    return records.value.find((r) => r.id === id)
+    return records.value.find((record) => record.id === id)
   }
 
-  return { records, sortedRecords, hasRecords, loadFromStorage, addRecord, removeRecord, clearAll, getRecordById }
+  return {
+    records,
+    sortedRecords,
+    hasRecords,
+    loadFromStorage,
+    addRecord,
+    removeRecord,
+    clearAll,
+    getRecordById,
+  }
 })

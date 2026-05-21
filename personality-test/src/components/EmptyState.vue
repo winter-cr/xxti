@@ -1,17 +1,44 @@
 <template>
   <div class="empty-state">
-    <p class="message">{{ message }}</p>
-    <button v-if="actionText" class="action-btn" @click="$emit('action')">{{ actionText }}</button>
+    <p>{{ message }}</p>
+    <button
+      v-if="actionText"
+      class="btn-secondary empty-action"
+      type="button"
+      @click="$emit('action')"
+    >
+      {{ actionText }}
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
-defineProps<{ message: string; actionText?: string }>()
-defineEmits<{ action: [] }>()
+withDefaults(defineProps<{
+  message: string
+  actionText?: string
+}>(), {
+  actionText: '',
+})
+
+defineEmits<{
+  action: []
+}>()
 </script>
 
 <style scoped lang="scss">
-.empty-state { text-align: center; padding: 32px 16px; }
-.message { color: var(--color-text-secondary); margin-bottom: 12px; }
-.action-btn { background: none; border: none; color: var(--color-primary); font-size: 14px; cursor: pointer; text-decoration: underline; }
+.empty-state {
+  padding: 28px;
+  border-radius: 18px;
+  border: 1px dashed var(--color-border-strong);
+  background: var(--color-surface-muted);
+  color: var(--color-text-secondary);
+  text-align: center;
+  display: grid;
+  gap: 14px;
+}
+
+.empty-action {
+  width: fit-content;
+  margin: 0 auto;
+}
 </style>

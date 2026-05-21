@@ -1,9 +1,9 @@
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import type { Question, TestResult, QuizProgress, ThemeId, Dimension } from '@/types'
 import { getThemeConfig } from '@/data/themes'
 import { calculate } from '@/services/resultCalculator'
 import { storageService } from '@/services/storageService'
+import type { Question, QuizProgress, TestResult, ThemeId } from '@/types'
 
 export const useQuizStore = defineStore('quiz', () => {
   const currentThemeId = ref<ThemeId>('mbti')
@@ -14,23 +14,16 @@ export const useQuizStore = defineStore('quiz', () => {
 
   const themeConfig = computed(() => getThemeConfig(currentThemeId.value))
   const currentThemeName = computed(() => themeConfig.value.meta.name)
-  const currentDimensions = computed<Dimension[]>(() => themeConfig.value.dimensions)
-  const currentQuestions = computed<Question[]>(() => themeConfig.value.questions)
-
   const currentQuestion = computed<Question>(
-    () => currentQuestions.value[currentQuestionIndex.value],
+    () => themeConfig.value.questions[currentQuestionIndex.value],
   )
-
-  const totalQuestions = computed<number>(() => currentQuestions.value.length)
-
+  const totalQuestions = computed<number>(() => themeConfig.value.questions.length)
   const progress = computed<string>(
     () => `${currentQuestionIndex.value + 1}/${totalQuestions.value}`,
   )
-
   const isQuizComplete = computed<boolean>(
     () => answers.value.size === totalQuestions.value,
   )
-
   const isLastQuestion = computed<boolean>(
     () => currentQuestionIndex.value === totalQuestions.value - 1,
   )
@@ -59,27 +52,30 @@ export const useQuizStore = defineStore('quiz', () => {
 
   function goToNext(): boolean {
     if (selectedOption.value === null) return false
+
     answers.value.set(
-      currentQuestions.value[currentQuestionIndex.value].index,
+      themeConfig.value.questions[currentQuestionIndex.value].index,
       selectedOption.value,
     )
+
     if (!isLastQuestion.value) {
-      currentQuestionIndex.value++
+      currentQuestionIndex.value += 1
       selectedOption.value = null
     }
+
     persistProgress()
     return true
   }
 
   function calculateResult(): TestResult {
-    const res = calculate(
-      answers.value,
-      themeConfig.value.dimensions,
-      themeConfig.value.questions,
-      themeConfig.value.types,
-    )
+    const res = calculate(answers.value, themeConfig.value)
     result.value = res
     return res
+  }
+
+  function hydrateResult(record: TestResult): void {
+    result.value = record
+    currentThemeId.value = record.themeId
   }
 
   function resetQuiz(): void {
@@ -93,23 +89,43 @@ export const useQuizStore = defineStore('quiz', () => {
   function restoreProgress(): boolean {
     const saved = storageService.loadProgress()
     if (!saved || !saved.answers) return false
-    if (saved.themeId) currentThemeId.value = saved.themeId
+
+    currentThemeId.value = saved.themeId
     currentQuestionIndex.value = saved.currentQuestionIndex
-    answers.value = new Map(Object.entries(saved.answers).map(([k, v]) => [Number(k), v]))
+    answers.value = new Map(
+      Object.entries(saved.answers).map(([k, v]) => [Number(k), v]),
+    )
     selectedOption.value = null
     result.value = null
     return true
   }
 
-  function hasInProgress(): boolean {
+  function hasInProgress(themeId?: ThemeId): boolean {
     const saved = storageService.loadProgress()
-    return saved !== null && Object.keys(saved.answers).length > 0
+    if (!saved || Object.keys(saved.answers).length === 0) return false
+    return themeId ? saved.themeId === themeId : true
   }
 
   return {
-    currentThemeId, currentQuestionIndex, answers, selectedOption, result,
-    currentThemeName, currentDimensions, currentQuestion, totalQuestions,
-    progress, isQuizComplete, isLastQuestion,
-    startQuiz, selectOption, goToNext, calculateResult, resetQuiz, restoreProgress, hasInProgress,
+    currentThemeId,
+    currentQuestionIndex,
+    answers,
+    selectedOption,
+    result,
+    themeConfig,
+    currentThemeName,
+    currentQuestion,
+    totalQuestions,
+    progress,
+    isQuizComplete,
+    isLastQuestion,
+    startQuiz,
+    selectOption,
+    goToNext,
+    calculateResult,
+    hydrateResult,
+    resetQuiz,
+    restoreProgress,
+    hasInProgress,
   }
 })

@@ -1,8 +1,8 @@
 import type { MatchRule } from '@/types'
 
 export const matchRules: MatchRule[] = [
-  { dimensionId: 'EI', polePairs: { 'AA': 80, 'AB': 40, 'BA': 40, 'BB': 80 } },
-  { dimensionId: 'NS', polePairs: { 'AA': 75, 'AB': 50, 'BA': 50, 'BB': 75 } },
-  { dimensionId: 'TF', polePairs: { 'AA': 65, 'AB': 85, 'BA': 85, 'BB': 65 } },
-  { dimensionId: 'JP', polePairs: { 'AA': 60, 'AB': 90, 'BA': 90, 'BB': 60 } },
+  { dimensionId: 'EI', polePairs: { AA: 0.9, AB: 0.72, BA: 0.72, BB: 0.88 } },
+  { dimensionId: 'NS', polePairs: { AA: 0.92, AB: 0.64, BA: 0.64, BB: 0.84 } },
+  { dimensionId: 'TF', polePairs: { AA: 0.78, AB: 0.86, BA: 0.86, BB: 0.8 } },
+  { dimensionId: 'JP', polePairs: { AA: 0.82, AB: 0.75, BA: 0.75, BB: 0.84 } },
 ]

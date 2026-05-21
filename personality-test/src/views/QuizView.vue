@@ -1,26 +1,40 @@
 <template>
-  <div class="page-container">
-    <div class="content-box" style="max-width: 600px;">
-      <div class="theme-label">{{ quizStore.currentThemeName }}</div>
-      <ProgressBar
-        :current="quizStore.currentQuestionIndex + 1"
-        :total="quizStore.totalQuestions"
-      />
+  <section class="page-shell quiz-shell">
+    <div class="quiz-panel">
+      <div class="quiz-head">
+        <div>
+          <p class="quiz-theme">{{ quizStore.currentThemeName }}</p>
+          <h1>按直觉选择更接近你的描述。</h1>
+        </div>
+        <ProgressBar
+          :current="quizStore.currentQuestionIndex + 1"
+          :total="quizStore.totalQuestions"
+        />
+      </div>
+
       <QuestionCard
         :question="quizStore.currentQuestion"
         :selected-option-id="quizStore.selectedOption"
         @select="handleSelect"
       />
-      <button class="btn-primary next-btn" @click="handleNext">
-        {{ quizStore.isLastQuestion ? '查看结果' : '下一题' }}
-      </button>
+
+      <div class="quiz-actions">
+        <button class="btn-secondary" type="button" @click="goHome">返回首页</button>
+        <button class="btn-primary next-btn" type="button" @click="handleNext">
+          {{ quizStore.isLastQuestion ? '查看结果' : '下一题' }}
+        </button>
+      </div>
     </div>
-    <ToastMessage v-model:visible="showToast" :message="toastMessage" />
-  </div>
+
+    <ToastMessage
+      v-model:visible="showToast"
+      :message="toastMessage"
+    />
+  </section>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuizStore } from '@/stores/quiz'
 import { useHistoryStore } from '@/stores/history'
@@ -34,11 +48,21 @@ const historyStore = useHistoryStore()
 const showToast = ref(false)
 const toastMessage = ref('')
 
-function handleSelect(optionId: string) {
+onMounted(() => {
+  if (!quizStore.result && quizStore.hasInProgress()) {
+    quizStore.restoreProgress()
+  }
+})
+
+function handleSelect(optionId: string): void {
   quizStore.selectOption(optionId)
 }
 
-function handleNext() {
+function goHome(): void {
+  router.push('/')
+}
+
+function handleNext(): void {
   if (quizStore.selectedOption === null) {
     toastMessage.value = '请先选择一个选项'
     showToast.value = true
@@ -50,30 +74,51 @@ function handleNext() {
 
   if (success && wasLast) {
     const result = quizStore.calculateResult()
-    historyStore.addRecord({
-      id: `${Date.now()}-${result.typeId}`,
-      timestamp: Date.now(),
-      themeId: quizStore.currentThemeId,
-      themeName: quizStore.currentThemeName,
-      typeId: result.typeId,
-      typeName: result.typeName,
-      typeDescription: result.typeDescription,
-      dimensionScores: result.dimensionScores,
-      colors: result.colors,
-    })
+    historyStore.addRecord(result)
     router.push('/result')
   }
 }
 </script>
 
 <style scoped lang="scss">
-.theme-label {
-  font-size: 13px;
-  color: var(--color-primary);
-  font-weight: 600;
-  margin-bottom: 8px;
-  text-align: center;
+.quiz-shell {
+  display: grid;
 }
 
-.next-btn { margin-top: 8px; }
+.quiz-panel {
+  width: min(760px, 100%);
+  margin: 0 auto;
+  padding: 28px;
+  border-radius: 26px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-soft);
+}
+
+.quiz-head {
+  display: grid;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.quiz-theme {
+  color: var(--color-primary);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.quiz-head h1 {
+  font-size: clamp(1.4rem, 2vw, 2rem);
+}
+
+.quiz-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.next-btn {
+  margin-left: auto;
+}
 </style>

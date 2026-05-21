@@ -1,9 +1,44 @@
 import type { Dimension } from '@/types'
 
 export const dimensions: Dimension[] = [
-  { id: 'OE', name: '开放性', poleAName: '开放', poleBName: '保守', poleAKey: 'O', poleBKey: 'C' },
-  { id: 'CO', name: '尽责性', poleAName: '尽责', poleBName: '随性', poleAKey: 'C', poleBKey: 'S' },
-  { id: 'EX', name: '外向性', poleAName: '外向', poleBName: '内向', poleAKey: 'E', poleBKey: 'I' },
-  { id: 'AG', name: '宜人性', poleAName: '友善', poleBName: '率直', poleAKey: 'A', poleBKey: 'D' },
-  { id: 'NE', name: '情绪性', poleAName: '稳定', poleBName: '敏感', poleAKey: 'S', poleBKey: 'N' },
+  {
+    id: 'OP',
+    name: '思维开放度',
+    poleAName: '开放',
+    poleBName: '务实',
+    poleAKey: 'O',
+    poleBKey: 'R',
+  },
+  {
+    id: 'CS',
+    name: '自我管理',
+    poleAName: '尽责',
+    poleBName: '松弛',
+    poleAKey: 'C',
+    poleBKey: 'F',
+  },
+  {
+    id: 'EI',
+    name: '社交能量',
+    poleAName: '外向',
+    poleBName: '内敛',
+    poleAKey: 'E',
+    poleBKey: 'I',
+  },
+  {
+    id: 'AD',
+    name: '人际取向',
+    poleAName: '亲和',
+    poleBName: '坚定',
+    poleAKey: 'A',
+    poleBKey: 'D',
+  },
+  {
+    id: 'NS',
+    name: '情绪波动',
+    poleAName: '敏感',
+    poleBName: '稳定',
+    poleAKey: 'N',
+    poleBKey: 'S',
+  },
 ]

@@ -1,67 +1,82 @@
-import type { QuizProgress, HistoryRecord, ThemeMode } from '@/types'
+import type { HistoryRecord, QuizProgress, ThemeMode } from '@/types'
 
-const STORAGE_KEY = 'personality-test-progress'
+const STORAGE_KEY_PROGRESS = 'personality-test-progress'
 const STORAGE_KEY_HISTORY = 'personality-test-history'
 const STORAGE_KEY_THEME = 'personality-test-theme'
 
-function isAvailable(): boolean {
-  try {
-    const testKey = '__test__'
-    localStorage.setItem(testKey, '1')
-    localStorage.removeItem(testKey)
-    return true
-  } catch {
-    return false
-  }
-}
-
 export const storageService = {
-  isAvailable,
+  isAvailable(): boolean {
+    try {
+      const testKey = '__test__'
+      localStorage.setItem(testKey, '1')
+      localStorage.removeItem(testKey)
+      return true
+    } catch {
+      return false
+    }
+  },
 
   saveProgress(data: QuizProgress): void {
-    if (!isAvailable()) return
+    if (!this.isAvailable()) return
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
-    } catch { /* quota exceeded */ }
+      localStorage.setItem(STORAGE_KEY_PROGRESS, JSON.stringify(data))
+    } catch {
+      // ignore quota errors
+    }
   },
 
   loadProgress(): QuizProgress | null {
-    if (!isAvailable()) return null
-    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!this.isAvailable()) return null
+    const raw = localStorage.getItem(STORAGE_KEY_PROGRESS)
     if (!raw) return null
-    try { return JSON.parse(raw) as QuizProgress } catch { return null }
+
+    try {
+      return JSON.parse(raw) as QuizProgress
+    } catch {
+      return null
+    }
   },
 
   clearProgress(): void {
-    if (!isAvailable()) return
-    localStorage.removeItem(STORAGE_KEY)
+    if (!this.isAvailable()) return
+    localStorage.removeItem(STORAGE_KEY_PROGRESS)
   },
 
   saveHistory(records: HistoryRecord[]): void {
-    if (!isAvailable()) return
+    if (!this.isAvailable()) return
     try {
       localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(records))
-    } catch { /* quota exceeded */ }
+    } catch {
+      // ignore quota errors
+    }
   },
 
   loadHistory(): HistoryRecord[] {
-    if (!isAvailable()) return []
+    if (!this.isAvailable()) return []
     const raw = localStorage.getItem(STORAGE_KEY_HISTORY)
     if (!raw) return []
-    try { return JSON.parse(raw) as HistoryRecord[] } catch { return [] }
+
+    try {
+      const parsed = JSON.parse(raw) as HistoryRecord[]
+      return Array.isArray(parsed) ? parsed : []
+    } catch {
+      return []
+    }
+  },
+
+  clearHistory(): void {
+    if (!this.isAvailable()) return
+    localStorage.removeItem(STORAGE_KEY_HISTORY)
   },
 
   saveTheme(mode: ThemeMode): void {
-    if (!isAvailable()) return
-    try {
-      localStorage.setItem(STORAGE_KEY_THEME, mode)
-    } catch { /* ignore */ }
+    if (!this.isAvailable()) return
+    localStorage.setItem(STORAGE_KEY_THEME, mode)
   },
 
   loadTheme(): ThemeMode | null {
-    if (!isAvailable()) return null
-    const raw = localStorage.getItem(STORAGE_KEY_THEME)
-    if (raw === 'light' || raw === 'dark') return raw
-    return null
+    if (!this.isAvailable()) return null
+    const value = localStorage.getItem(STORAGE_KEY_THEME)
+    return value === 'light' || value === 'dark' ? value : null
   },
 }
