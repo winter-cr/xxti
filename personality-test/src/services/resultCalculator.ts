@@ -16,21 +16,11 @@ export function calculate(
     for (const q of relatedQuestions) {
       const selectedId = answers.get(q.index)
       if (!selectedId) continue
-      if (selectedId === q.optionA.id) {
-        poleAScore++
-      } else {
-        poleBScore++
-      }
+      if (selectedId === q.optionA.id) poleAScore++
+      else poleBScore++
     }
 
-    let resultPoleKey: string
-    if (poleAScore > poleBScore) {
-      resultPoleKey = dim.poleAKey
-    } else if (poleAScore < poleBScore) {
-      resultPoleKey = dim.poleBKey
-    } else {
-      resultPoleKey = dim.poleAKey
-    }
+    const resultPoleKey = poleAScore >= poleBScore ? dim.poleAKey : dim.poleBKey
 
     dimensionScores.push({
       dimensionId: dim.id,
@@ -51,5 +41,6 @@ export function calculate(
     typeName: typeInfo?.name ?? '未知类型',
     typeDescription: typeInfo?.description ?? '',
     dimensionScores,
+    colors: typeInfo?.colors,
   }
 }

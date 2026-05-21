@@ -5,6 +5,16 @@ import App from './App.vue'
 import './styles/global.scss'
 
 const app = createApp(App)
-app.use(createPinia())
+const pinia = createPinia()
+app.use(pinia)
+
+import { useThemeStore } from './stores/theme'
+const themeStore = useThemeStore()
+themeStore.initTheme()
+
+import { useHistoryStore } from './stores/history'
+const historyStore = useHistoryStore()
+historyStore.loadFromStorage()
+
 app.use(router)
 app.mount('#app')

@@ -126,19 +126,3 @@
 - 纯静态产物，可部署至CDN
 
 ---
-
-## 记录-6: 修复NavBar和主题切换按钮不可见
-
-**时间**: 2026-05-21
-
-**问题**: 首页只能看到三大人格测试卡片，NavBar导航栏(首页/百科/匹配/记录)和ThemeToggle(明暗切换)不可见
-
-**原因**: App.vue中NavBar和main没有包裹在flex列布局容器中；page-container的justify-content:center和min-height导致NavBar被推出可视区域
-
-**修改**:
-- `src/App.vue` - 添加#app-root容器，display:flex; flex-direction:column; min-height:100vh，确保NavBar在顶部、main在下方
-- `src/styles/global.scss` - 移除page-container的justify-content:center和min-height:calc(100vh-52px)，改为正常流式布局
-
-**验收**: NavBar始终固定在页面顶部，包含首页/百科/匹配/记录4个导航项和明暗切换按钮；所有导航项可点击跳转
-
----
